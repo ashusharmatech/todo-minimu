@@ -2,9 +2,6 @@
 import React, { useState } from 'react';
 import WeekView from '@/components/WeekView';
 import Header from '@/components/Header';
-import { ThemeProvider } from '@/context/ThemeContext';
-import { TaskProvider } from '@/context/TaskContext';
-import { AuthProvider } from '@/context/AuthContext';
 import LoginModal from '@/components/modals/LoginModal';
 import ListsModal from '@/components/modals/ListsModal';
 import { addDays } from 'date-fns';
@@ -17,35 +14,29 @@ const Index = () => {
   const isMobile = useIsMobile();
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <TaskProvider>
-          <div className="flex flex-col min-h-screen">
-            <Header 
-              onShowLoginModal={() => setShowLoginModal(true)} 
-              onShowListsModal={() => setShowListsModal(true)} 
-            />
-            
-            <main className="flex-1 overflow-hidden">
-              <WeekView 
-                currentDate={currentDate} 
-                onDateChange={setCurrentDate} 
-              />
-            </main>
+    <div className="flex flex-col min-h-screen">
+      <Header 
+        onShowLoginModal={() => setShowLoginModal(true)} 
+        onShowListsModal={() => setShowListsModal(true)} 
+      />
+      
+      <main className="flex-1 overflow-hidden">
+        <WeekView 
+          currentDate={currentDate} 
+          onDateChange={setCurrentDate} 
+        />
+      </main>
 
-            <LoginModal 
-              isOpen={showLoginModal}
-              onClose={() => setShowLoginModal(false)}
-            />
-            
-            <ListsModal
-              isOpen={showListsModal}
-              onClose={() => setShowListsModal(false)}
-            />
-          </div>
-        </TaskProvider>
-      </AuthProvider>
-    </ThemeProvider>
+      <LoginModal 
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
+      
+      <ListsModal
+        isOpen={showListsModal}
+        onClose={() => setShowListsModal(false)}
+      />
+    </div>
   );
 };
 
