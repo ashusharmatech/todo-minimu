@@ -32,7 +32,7 @@ const DateView = () => {
 
   // Filter tasks based on list and search term
   const filteredTasks = tasksForDate.filter(task => {
-    const matchesList = !filter || task.list === filter;
+    const matchesList = filter === 'all' || !filter || task.list === filter;
     const matchesSearch = !searchTerm || 
       task.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (task.description && task.description.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -82,7 +82,7 @@ const DateView = () => {
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Lists</SelectItem>
+              <SelectItem value="all">All Lists</SelectItem>
               {lists.map(list => (
                 <SelectItem key={list.id} value={list.id}>
                   <div className="flex items-center gap-2">
