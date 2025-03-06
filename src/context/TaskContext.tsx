@@ -1,8 +1,7 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Task, TaskList, Subtask, List } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
-import { addDays, format } from 'date-fns';
+import { addDays, format as dateFormat } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/lib/supabase';
 
@@ -42,7 +41,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Load tasks from localStorage on mount
   useEffect(() => {
     const loadTasks = async () => {
       try {
@@ -56,7 +54,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (storedLists) {
           setLists(JSON.parse(storedLists));
         } else {
-          // Create default lists if none exist
           const defaultLists = [
             { id: uuidv4(), name: 'Personal', color: 'blue' },
             { id: uuidv4(), name: 'Work', color: 'green' },
@@ -79,14 +76,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadTasks();
   }, []);
 
-  // Save tasks to localStorage whenever they change
   useEffect(() => {
     if (!loading) {
       localStorage.setItem('tasks', JSON.stringify(tasks));
     }
   }, [tasks, loading]);
 
-  // Save lists to localStorage whenever they change
   useEffect(() => {
     if (!loading) {
       localStorage.setItem('lists', JSON.stringify(lists));
@@ -117,17 +112,14 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTasks(prev => {
       const updatedTasks = { ...prev };
       
-      // Find and remove the task from its current date
       Object.keys(updatedTasks).forEach(date => {
         updatedTasks[date] = updatedTasks[date].filter(task => task.id !== updatedTask.id);
         
-        // Remove empty date arrays
         if (updatedTasks[date].length === 0) {
           delete updatedTasks[date];
         }
       });
       
-      // Add the task to its (potentially new) date
       if (!updatedTasks[updatedTask.date]) {
         updatedTasks[updatedTask.date] = [];
       }
@@ -145,7 +137,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       Object.keys(updatedTasks).forEach(date => {
         updatedTasks[date] = updatedTasks[date].filter(task => task.id !== taskId);
         
-        // Remove empty date arrays
         if (updatedTasks[date].length === 0) {
           delete updatedTasks[date];
         }
@@ -175,7 +166,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const moveTask = (taskId: string, newDate: string) => {
     let taskToMove: Task | undefined;
     
-    // Find the task
     Object.keys(tasks).forEach(date => {
       const foundTask = tasks[date].find(task => task.id === taskId);
       if (foundTask) {
@@ -310,7 +300,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `planner-export-${format(new Date(), 'yyyy-MM-dd')}.json`;
+        a.download = `planner-export-${dateFormat(new Date(), 'yyyy-MM-dd')}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -321,7 +311,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: "Your data has been exported as JSON",
         });
       } else if (format === 'csv') {
-        // Flatten tasks for CSV export
         const flattenedTasks: any[] = [];
         
         Object.keys(tasks).forEach(date => {
@@ -339,7 +328,15 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
         });
         
-        // Convert to CSV
+        if (flattenedTasks.length === 0) {
+          toast({
+            title: "No tasks to export",
+            description: "Add some tasks before exporting",
+            variant: "destructive",
+          });
+          return;
+        }
+        
         const headers = Object.keys(flattenedTasks[0] || {}).join(',');
         const rows = flattenedTasks.map(task => 
           Object.values(task).map(value => 
@@ -353,7 +350,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `planner-export-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+        a.download = `planner-export-${dateFormat(new Date(), 'yyyy-MM-dd')}.csv`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -381,7 +378,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (updatedTasks[date]) {
         const tasksMap = new Map(updatedTasks[date].map(task => [task.id, task]));
         
-        // Create a new array with the tasks in the desired order
         updatedTasks[date] = taskIds
           .filter(id => tasksMap.has(id))
           .map((id, index) => {

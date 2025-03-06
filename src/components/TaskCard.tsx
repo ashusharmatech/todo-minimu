@@ -1,11 +1,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Task, TaskColor, Subtask } from '@/types';
-import { Check, X, ChevronDown, ChevronRight, Circle, CheckCircle, Trash, MoreHorizontal, Plus } from 'lucide-react';
+import { Check, X, ChevronDown, ChevronRight, Circle, CheckCircle, Trash, MoreHorizontal, Plus, ListIcon } from 'lucide-react';
 import { useTaskContext } from '@/context/TaskContext';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface TaskCardProps {
   task: Task;
@@ -13,13 +14,14 @@ interface TaskCardProps {
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart }) => {
-  const { updateTask, deleteTask, toggleTaskCompletion, addSubtask, toggleSubtaskCompletion, deleteSubtask } = useTaskContext();
+  const { updateTask, deleteTask, toggleTaskCompletion, addSubtask, toggleSubtaskCompletion, deleteSubtask, lists } = useTaskContext();
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(task.content);
   const [editedDescription, setEditedDescription] = useState(task.description || '');
   const [showSubtasks, setShowSubtasks] = useState(false);
   const [newSubtaskContent, setNewSubtaskContent] = useState('');
   const [showSubtaskInput, setShowSubtaskInput] = useState(false);
+  const [selectedList, setSelectedList] = useState(task.list || '');
   const contentInputRef = useRef<HTMLInputElement>(null);
 
   const colorOptions: TaskColor[] = ['red', 'blue', 'green', 'yellow', 'purple', 'pink', 'orange', 'teal', 'cyan', 'indigo'];
@@ -39,6 +41,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart }) => {
       ...task,
       content: editedContent.trim(),
       description: editedDescription.trim() || undefined,
+      list: selectedList || undefined,
     });
     setIsEditing(false);
   };
@@ -46,6 +49,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart }) => {
   const handleCancel = () => {
     setEditedContent(task.content);
     setEditedDescription(task.description || '');
+    setSelectedList(task.list || '');
     setIsEditing(false);
   };
 
@@ -54,6 +58,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart }) => {
       ...task,
       color,
     });
+  };
+
+  const handleListChange = (listId: string) => {
+    setSelectedList(listId);
   };
 
   const handleAddSubtask = () => {
@@ -72,6 +80,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart }) => {
       handleCancel();
     }
   };
+
+  // Find the selected list for display
+  const selectedListName = lists.find(list => list.id === task.list)?.name;
 
   return (
     <div
@@ -119,44 +130,28 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart }) => {
             ))}
           </div>
           
-          {task.subtasks.length > 0 && (
+          {lists.length > 0 && (
             <div className="mt-2">
-              <button
-                type="button"
-                className="text-xs flex items-center gap-1"
-                onClick={() => setShowSubtasks(!showSubtasks)}
-              >
-                {showSubtasks ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                Subtasks ({task.subtasks.length})
-              </button>
-              
-              {showSubtasks && (
-                <ul className="subtask-list">
-                  {task.subtasks.map((subtask) => (
-                    <li key={subtask.id} className="subtask-item">
-                      <button
-                        type="button"
-                        onClick={() => toggleSubtaskCompletion(task.id, subtask.id)}
-                        className="mr-1"
-                      >
-                        {subtask.completed ? (
-                          <CheckCircle className="h-3 w-3 text-green-500" />
-                        ) : (
-                          <Circle className="h-3 w-3" />
+              <Select value={selectedList} onValueChange={handleListChange}>
+                <SelectTrigger className="w-full h-8 text-xs">
+                  <SelectValue placeholder="Select a list" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No list</SelectItem>
+                  {lists.map(list => (
+                    <SelectItem key={list.id} value={list.id}>
+                      <div className="flex items-center">
+                        {list.color && (
+                          <div 
+                            className={`w-3 h-3 rounded-full mr-2 bg-task-${list.color}`}
+                          />
                         )}
-                      </button>
-                      <span className={cn(subtask.completed && 'line-through opacity-60')}>{subtask.content}</span>
-                      <button
-                        type="button"
-                        onClick={() => deleteSubtask(task.id, subtask.id)}
-                        className="ml-auto"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </li>
+                        {list.name}
+                      </div>
+                    </SelectItem>
                   ))}
-                </ul>
-              )}
+                </SelectContent>
+              </Select>
             </div>
           )}
           
@@ -264,6 +259,12 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart }) => {
             {task.description && (
               <div className="text-sm text-muted-foreground mt-1">
                 {task.description}
+              </div>
+            )}
+            
+            {selectedListName && (
+              <div className="mt-1 flex items-center text-xs text-muted-foreground">
+                <ListIcon className="h-3 w-3 mr-1" /> {selectedListName}
               </div>
             )}
             
