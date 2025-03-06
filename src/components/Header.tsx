@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useTheme } from '@/context/ThemeContext';
+import { useThemeContext } from '@/context/ThemeContext';
 import { useAuthContext } from '@/context/AuthContext';
 import { useTaskContext } from '@/context/TaskContext';
 import { Button } from '@/components/ui/button';
@@ -32,13 +32,13 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onShowLoginModal, onShowListsModal }) => {
-  const { theme, setTheme } = useTheme();
+  const { theme, toggleTheme } = useThemeContext();
   const { user, logout } = useAuthContext();
   const { exportData } = useTaskContext();
   const navigate = useNavigate();
   
   const handleThemeToggle = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    toggleTheme();
   };
   
   const handleLogout = async () => {
