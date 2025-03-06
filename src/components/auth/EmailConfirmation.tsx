@@ -16,16 +16,19 @@ const EmailConfirmation = () => {
   useEffect(() => {
     const handleEmailConfirmation = async () => {
       try {
-        // Extract the access token from the URL hash
-        const hash = location.hash;
+        // Log the current URL to help with debugging
+        console.log('Current URL:', window.location.href);
+        console.log('Location hash:', location.hash);
         
-        if (!hash) {
+        // Check if we have a hash (access_token and other params)
+        if (!location.hash || !location.hash.includes('access_token')) {
           setStatus('error');
           setMessage('Invalid confirmation link. No authentication data found.');
           return;
         }
 
-        // Call Supabase to process the token and complete the sign up
+        // Get the hash and refresh the session with Supabase
+        // This will automatically handle the tokens in the URL
         const { error } = await supabase.auth.refreshSession();
 
         if (error) {

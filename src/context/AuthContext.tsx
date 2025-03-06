@@ -98,12 +98,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string, name?: string) => {
     try {
+      // Get the full URL for email confirmation
+      const redirectUrl = `${window.location.origin}/auth/confirm`;
+      console.log('Redirect URL:', redirectUrl);
+      
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: { name },
-          emailRedirectTo: window.location.origin + '/auth/confirm',
+          emailRedirectTo: redirectUrl,
         },
       });
 
@@ -146,10 +150,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const googleLogin = async () => {
     try {
+      const redirectUrl = `${window.location.origin}/auth/confirm`;
+      console.log('Google redirect URL:', redirectUrl);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + '/auth/confirm',
+          redirectTo: redirectUrl,
         }
       });
 

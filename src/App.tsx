@@ -42,6 +42,7 @@ const AppRoutes = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
+              {/* Make sure the order is correct and the route matches exactly */}
               <Route path="/auth/confirm" element={<EmailConfirmation />} />
               <Route path="/planner" element={
                 <ProtectedRoute>
