@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Task, TaskColor, Subtask } from '@/types';
 import { Check, X, ChevronDown, ChevronRight, Circle, CheckCircle, Trash, MoreHorizontal, Plus, ListIcon } from 'lucide-react';
@@ -21,7 +20,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart }) => {
   const [showSubtasks, setShowSubtasks] = useState(false);
   const [newSubtaskContent, setNewSubtaskContent] = useState('');
   const [showSubtaskInput, setShowSubtaskInput] = useState(false);
-  const [selectedList, setSelectedList] = useState(task.list || '');
+  const [selectedList, setSelectedList] = useState(task.list || 'none');
   const contentInputRef = useRef<HTMLInputElement>(null);
 
   const colorOptions: TaskColor[] = ['red', 'blue', 'green', 'yellow', 'purple', 'pink', 'orange', 'teal', 'cyan', 'indigo'];
@@ -41,7 +40,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart }) => {
       ...task,
       content: editedContent.trim(),
       description: editedDescription.trim() || undefined,
-      list: selectedList || undefined,
+      list: selectedList === 'none' ? undefined : selectedList,
     });
     setIsEditing(false);
   };
@@ -49,7 +48,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart }) => {
   const handleCancel = () => {
     setEditedContent(task.content);
     setEditedDescription(task.description || '');
-    setSelectedList(task.list || '');
+    setSelectedList(task.list || 'none');
     setIsEditing(false);
   };
 
@@ -137,7 +136,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart }) => {
                   <SelectValue placeholder="Select a list" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No list</SelectItem>
+                  <SelectItem value="none">No list</SelectItem>
                   {lists.map(list => (
                     <SelectItem key={list.id} value={list.id}>
                       <div className="flex items-center">
