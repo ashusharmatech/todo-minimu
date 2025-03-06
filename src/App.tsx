@@ -12,6 +12,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import DateView from "./pages/DateView";
 import NotFound from "./pages/NotFound";
+import EmailConfirmation from "./components/auth/EmailConfirmation";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const AppRoutes = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/auth/confirm" element={<EmailConfirmation />} />
               <Route path="/planner" element={
                 <ProtectedRoute>
                   <Index />

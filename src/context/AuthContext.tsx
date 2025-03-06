@@ -31,6 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event);
         if (session) {
           const { user } = session;
           setUser({
@@ -38,6 +39,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: user.email || '',
             name: user.user_metadata.name,
           });
+          
+          // Show toast on email confirmation
+          if (event === 'SIGNED_IN' && user.email_confirmed_at) {
+            toast({
+              title: "Email verified",
+              description: "Your email has been verified successfully.",
+            });
+          }
         } else {
           setUser(null);
         }
@@ -61,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [toast]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -94,6 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         password,
         options: {
           data: { name },
+          emailRedirectTo: window.location.origin + '/auth/confirm',
         },
       });
 
@@ -101,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       toast({
         title: "Account created",
-        description: "Your account has been created successfully",
+        description: "Please check your email to confirm your account.",
       });
     } catch (error: any) {
       console.error('Signup error:', error);
@@ -138,6 +148,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/auth/confirm',
+        }
       });
 
       if (error) throw error;
